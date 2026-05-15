@@ -1,0 +1,40 @@
+# ── Core ML ──────────────────────────────────────────────────────────────────
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.44.0
+accelerate>=0.30.0
+bitsandbytes>=0.43.0          # 8-bit / 4-bit quantization for Colab
+
+# ── Models ────────────────────────────────────────────────────────────────────
+colpali-engine>=0.3.1         # ColPali late-interaction retrieval
+sentence-transformers>=3.0.0  # SBERT for text embeddings
+open-clip-torch>=2.24.0       # OpenCLIP (used via HuggingFace CLIP API too)
+
+# ── Retrieval ─────────────────────────────────────────────────────────────────
+faiss-cpu>=1.8.0              # use faiss-gpu if CUDA available
+
+# ── Evaluation ────────────────────────────────────────────────────────────────
+nltk>=3.8.1                   # BLEU
+rouge-score>=0.1.2            # ROUGE-L
+bert-score>=0.3.13            # BERTScore
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+pandas>=2.1.0
+Pillow>=10.0.0
+pydicom>=2.4.3                # DICOM file support
+scikit-learn>=1.4.0           # train/test split utilities
+numpy>=1.26.0
+
+# ── QA Dataset Creation ───────────────────────────────────────────────────────
+groq>=0.9.0                   # Groq Python SDK
+tqdm>=4.66.0
+
+# ── Demo App ──────────────────────────────────────────────────────────────────
+streamlit>=1.35.0
+plotly>=5.22.0                # optional charts in Streamlit
+
+# ── Notebooks ─────────────────────────────────────────────────────────────────
+jupyter>=1.0.0
+ipywidgets>=8.1.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
