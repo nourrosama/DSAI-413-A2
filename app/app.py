@@ -52,7 +52,8 @@ st.markdown("""
         margin-bottom: 1.5rem;
     }
     .report-box {
-        background-color: #f8f9fa;
+        background-color: #1e1e2e !important;
+        color: #e0e0e0 !important;
         border-left: 4px solid #0d6efd;
         padding: 1rem 1.2rem;
         border-radius: 4px;
@@ -61,7 +62,8 @@ st.markdown("""
         line-height: 1.6;
     }
     .answer-box {
-        background-color: #f0fff4;
+        background-color: #1a2e1a !important;
+        color: #e0e0e0 !important;
         border-left: 4px solid #28a745;
         padding: 1rem 1.2rem;
         border-radius: 4px;
@@ -69,7 +71,8 @@ st.markdown("""
         line-height: 1.6;
     }
     .context-box {
-        background-color: #fff8e1;
+        background-color: #2e2a1a !important;
+        color: #e0e0e0 !important;
         border-left: 4px solid #ffc107;
         padding: 0.8rem 1rem;
         border-radius: 4px;
