@@ -81,6 +81,8 @@ class CLIPEncoder:
             batch = images[i : i + batch_size]
             inputs = self.processor(images=batch, return_tensors="pt", padding=True).to(self.device)
             embs = self.model.get_image_features(**inputs)  # (B, D)
+            if hasattr(embs, 'pooler_output'):
+                embs = embs.pooler_output
             embs = embs / embs.norm(dim=-1, keepdim=True)
             all_embs.append(embs.cpu().float().numpy())
 
@@ -106,6 +108,8 @@ class CLIPEncoder:
             batch = texts[i : i + batch_size]
             inputs = self.processor(text=batch, return_tensors="pt", padding=True, truncation=True).to(self.device)
             embs = self.model.get_text_features(**inputs)  # (B, D)
+            if hasattr(embs, 'pooler_output'):
+                embs = embs.pooler_output
             embs = embs / embs.norm(dim=-1, keepdim=True)
             all_embs.append(embs.cpu().float().numpy())
 
