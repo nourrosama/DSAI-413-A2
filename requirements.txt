@@ -3,7 +3,7 @@ torch>=2.2.0
 torchvision>=0.17.0
 transformers>=4.44.0
 accelerate>=0.30.0
-bitsandbytes>=0.43.0          # 8-bit / 4-bit quantization for Colab
+bitsandbytes>=0.43.0,<0.46.0  # 4-bit quantization; 0.46+ changed API on some GPUs
 
 # ── Models ────────────────────────────────────────────────────────────────────
 colpali-engine>=0.3.1         # ColPali late-interaction retrieval

@@ -58,31 +58,55 @@ class MedGemmaModel:
         """Load the model and processor. Call once before inference."""
         print(f"Loading MedGemma from '{self.model_id}' …")
 
-        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
-
-        quantization_config = None
-        if self.load_in_4bit and self.device != "cpu":
-            quantization_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=dtype,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4",
-            )
+        # P100 does not support bfloat16 — always use float16 on GPU
+        dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
         self.processor = AutoProcessor.from_pretrained(
             self.model_id,
             trust_remote_code=True,
         )
 
-        self.model = AutoModelForImageTextToText.from_pretrained(
-            self.model_id,
-            quantization_config=quantization_config,
-            torch_dtype=dtype if quantization_config is None else None,
-            device_map="auto" if self.device != "cpu" else None,
-            trust_remote_code=True,
-        )
-        self.model.eval()
-        print("MedGemma loaded ✓")
+        # ── Attempt 1: 4-bit quantization (requires bitsandbytes + CUDA) ────────
+        if self.load_in_4bit and self.device != "cpu":
+            try:
+                quantization_config = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=dtype,
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_quant_type="nf4",
+                )
+                self.model = AutoModelForImageTextToText.from_pretrained(
+                    self.model_id,
+                    quantization_config=quantization_config,
+                    device_map="auto",
+                    trust_remote_code=True,
+                )
+                self.model.eval()
+                print("MedGemma loaded in 4-bit ✓")
+                return
+            except Exception as e:
+                print(f"  4-bit load failed ({e}), falling back to float16 …")
+
+        # ── Attempt 2: float16 (fits in 16 GB VRAM for a 4B model) ─────────────
+        try:
+            self.model = AutoModelForImageTextToText.from_pretrained(
+                self.model_id,
+                dtype=dtype,
+                device_map="auto" if self.device != "cpu" else None,
+                trust_remote_code=True,
+            )
+            self.model.eval()
+            print(f"MedGemma loaded in {dtype} ✓")
+        except TypeError:
+            # Older transformers versions still use torch_dtype
+            self.model = AutoModelForImageTextToText.from_pretrained(
+                self.model_id,
+                torch_dtype=dtype,
+                device_map="auto" if self.device != "cpu" else None,
+                trust_remote_code=True,
+            )
+            self.model.eval()
+            print(f"MedGemma loaded in {dtype} (legacy API) ✓")
 
     def _check_loaded(self) -> None:
         if self.model is None or self.processor is None:
