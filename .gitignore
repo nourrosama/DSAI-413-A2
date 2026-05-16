@@ -1,36 +1,11 @@
-# ── Data (large files — keep off GitHub) ─────────────────────────────────────
-data/mimic-cxr/
-data/faiss_index.bin
-data/faiss_index_clip.bin
-data/faiss_metadata.json
-data/faiss_metadata_clip.json
-data/split_indices.json
-data/sample_images/
-
-# ── Keep these (small generated files worth sharing) ─────────────────────────
-!data/qa_dataset/qa_pairs.json
-
-# ── Environment & secrets ─────────────────────────────────────────────────────
-.env
-*.env
-
-# ── Python ────────────────────────────────────────────────────────────────────
+﻿venv/
+venv_locked/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-.Python
-venv/
-env/
-*.egg-info/
-
-# ── Jupyter checkpoints ───────────────────────────────────────────────────────
+.env
 .ipynb_checkpoints/
-
-# ── VS Code ───────────────────────────────────────────────────────────────────
-.vscode/
-
-# ── Model cache (HuggingFace downloads) ──────────────────────────────────────
+data/mimic-cxr/
+*.faiss
 *.bin
-*.safetensors
-*.ckpt
