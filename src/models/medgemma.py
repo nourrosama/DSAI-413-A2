@@ -123,12 +123,14 @@ class MedGemmaModel:
         """Core generation — takes a PIL image and a text prompt."""
         self._check_loaded()
 
-        # Build the conversation in chat format expected by instruction-tuned models
+        # Build the conversation in chat format expected by instruction-tuned models.
+        # Note: {"type": "image"} is a placeholder only — the actual PIL image is
+        # passed to the processor below. Newer transformers (4.47+) changed this API.
         messages = [
             {
                 "role": "user",
                 "content": [
-                    {"type": "image", "image": image},
+                    {"type": "image"},
                     {"type": "text",  "text": prompt},
                 ],
             }
