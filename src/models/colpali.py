@@ -174,7 +174,11 @@ class ColPaliModel:
             d_input = self.processor.process_images([img]).to(self.model.device)
             d_emb = self.model(**d_input)  # (1, seq_len_d, D)
             # MaxSim: for each query token, find max similarity across document tokens
-            sim = torch.einsum("qid,djd->qj", q_emb, d_emb)  # (seq_len_q, seq_len_d)
+            # q_emb: (1, seq_len_q, D) → squeeze to (seq_len_q, D)
+            # d_emb: (1, seq_len_d, D) → squeeze to (seq_len_d, D)
+            q = q_emb.squeeze(0)  # (seq_len_q, D)
+            d = d_emb.squeeze(0)  # (seq_len_d, D)
+            sim = torch.einsum("qd,nd->qn", q, d)  # (seq_len_q, seq_len_d)
             score = sim.max(dim=-1).values.sum().item()
             scores.append(score)
 

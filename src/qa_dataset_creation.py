@@ -102,9 +102,10 @@ def generate_qa_for_report(
         for p in pairs:
             if isinstance(p, dict) and "question" in p and "answer" in p:
                 valid.append({
-                    "question": str(p["question"]).strip(),
-                    "answer":   str(p["answer"]).strip(),
-                    "category": str(p.get("category", "general")).strip(),
+                    "question":          str(p["question"]).strip(),
+                    "answer":            str(p["answer"]).strip(),
+                    "category":          str(p.get("category", "general")).strip(),
+                    "generation_method": "groq",
                 })
         return valid
 

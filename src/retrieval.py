@@ -154,6 +154,7 @@ def build_index_from_images(
     image_paths: List[str],
     backend: str = RETRIEVAL_BACKEND,
     save: bool = True,
+    model=None,
 ) -> RetrievalIndex:
     """
     Full pipeline: embed images → build FAISS index → optionally save.
@@ -165,8 +166,9 @@ def build_index_from_images(
     image_paths : Paired image paths (stored as metadata).
     backend     : "colpali" | "clip" | "sbert"
     save        : Whether to persist the index to disk.
+    model       : Optional pre-loaded model instance to reuse (avoids reloading).
     """
-    embeddings = _embed_images(images, backend)
+    embeddings = _embed_images(images, backend, model=model)
 
     metadata = [
         {"image_path": p, "report": r, "index": i}
@@ -185,15 +187,20 @@ def retrieve_for_query(
     index: RetrievalIndex,
     backend: str = RETRIEVAL_BACKEND,
     top_k: int = FAISS_TOP_K,
+    model=None,
 ) -> List[Dict[str, Any]]:
     """
     Embed a query image and retrieve top-K similar documents from the index.
+
+    Parameters
+    ----------
+    model : Optional pre-loaded model instance to reuse (avoids reloading).
 
     Returns
     -------
     List of result dicts with keys: image_path, report, score.
     """
-    q_emb = _embed_query(query_image, backend)
+    q_emb = _embed_query(query_image, backend, model=model)
     return index.query(q_emb, top_k=top_k)
 
 
@@ -237,16 +244,22 @@ def precision_at_k(
 
 # ─── Internal embedding dispatch ──────────────────────────────────────────────
 
-def _embed_images(images: List[Image.Image], backend: str) -> np.ndarray:
+def _embed_images(images: List[Image.Image], backend: str, model=None) -> np.ndarray:
+    """
+    Embed a list of images using the specified backend.
+    Pass `model` to reuse an already-loaded instance and avoid repeated loading.
+    """
     if backend == "colpali":
         from src.models.colpali import ColPaliModel
-        m = ColPaliModel()
-        m.load()
+        m = model if model is not None else ColPaliModel()
+        if model is None:
+            m.load()
         return m.embed_images(images)
     elif backend == "clip":
         from src.models.clip_model import CLIPEncoder
-        m = CLIPEncoder()
-        m.load()
+        m = model if model is not None else CLIPEncoder()
+        if model is None:
+            m.load()
         return m.embed_images(images)
     elif backend == "sbert":
         raise ValueError("SBERT backend embeds text, not images. Use build_index_from_texts() instead.")
@@ -254,16 +267,22 @@ def _embed_images(images: List[Image.Image], backend: str) -> np.ndarray:
         raise ValueError(f"Unknown retrieval backend: {backend}")
 
 
-def _embed_query(image: Image.Image, backend: str) -> np.ndarray:
+def _embed_query(image: Image.Image, backend: str, model=None) -> np.ndarray:
+    """
+    Embed a single query image.
+    Pass `model` to reuse an already-loaded instance and avoid repeated loading.
+    """
     if backend == "colpali":
         from src.models.colpali import ColPaliModel
-        m = ColPaliModel()
-        m.load()
+        m = model if model is not None else ColPaliModel()
+        if model is None:
+            m.load()
         return m.embed_query_image(image)
     elif backend == "clip":
         from src.models.clip_model import CLIPEncoder
-        m = CLIPEncoder()
-        m.load()
+        m = model if model is not None else CLIPEncoder()
+        if model is None:
+            m.load()
         return m.embed_single_image(image)
     else:
         raise ValueError(f"Unknown retrieval backend for image query: {backend}")
