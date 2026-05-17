@@ -55,9 +55,18 @@ class ColPaliModel:
 
     def load(self) -> None:
         """Load ColPali model and processor. Call once before inference."""
-        print(f"Loading ColPali from '{self.model_id}' …")
+        print(f"Loading ColPali from '{self.model_id}' (device={self.device}) …")
 
-        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        # Dtype choice:
+        #   - CUDA + bf16 GPU: bfloat16 (fastest, no overflow)
+        #   - CUDA but no bf16: float16
+        #   - CPU: float32 (CPU ops are mostly fp32; fp16 either errors or is slower)
+        if self.device == "cpu":
+            dtype = torch.float32
+        elif torch.cuda.is_bf16_supported():
+            dtype = torch.bfloat16
+        else:
+            dtype = torch.float16
 
         self.model = ColPali.from_pretrained(
             self.model_id,
@@ -66,7 +75,7 @@ class ColPaliModel:
         ).eval()
 
         self.processor = ColPaliProcessor.from_pretrained(self.model_id)
-        print("ColPali loaded ✓")
+        print(f"ColPali loaded (dtype={dtype}) ✓")
 
     def _check_loaded(self) -> None:
         if self.model is None:
